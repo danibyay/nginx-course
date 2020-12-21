@@ -33,15 +33,48 @@ If using the nginx container, this is how you reload it, instead of systemd
 > docker exec <nginx-container-name-or-id> nginx -s reload
 
 ## Create our own website
-create a new file in /etc/nginx
+create a new file in /etc/nginx/conf.d/
+
+The main conf file includes all *.conf files that are here.
 > kplabs.conf
 
-backup the default conf files
-    mv nginx.conf.default nginx.conf.default.bak
-    ssl.conf # not found
-    virtual.conf # not found
+At the end, instead of using that file I only replaced the root directive on the nginx.conf file.
+
+        #root         /usr/share/nginx/html;
+        root         /var/www/websites/;
+
+backup the default conf files (it was on the course but I didn't do it)
+
+        mv nginx.conf.default nginx.conf.default.bak
+        ssl.conf (not found on centos8, the course uses centos6)
+        virtual.conf (not found either)
 
 create the websites directory
-    mkdir -p /var/www/websites
-    cd /var/www/websites
-    touch index.html
+
+        mkdir -p /var/www/websites
+        cd /var/www/websites
+        touch index.html
+        chmod 755 .
+
+Disable selinux, for development. Before this I had 403 forbidden.
+
+It is a state machine, first from enabled - permissive, then disabled.
+
+This will set it to permissive.
+> setenforce 0
+
+Open the config file of selinux
+> vi /etc/selinux/config
+
+Modify from permissive to disabled
+> SELINUX=disabled
+Restart
+> systemctl restart nginx
+
+See errors here
+> /var/log/nginx/error.log
+
+Restart the service and visit the webpage
+> systemctl restart nginx
+
+![](images/hello_world.png)
